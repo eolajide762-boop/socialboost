@@ -1,1 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SocialBoost</title>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f7ff;color:#111827}
+button,input,select{font:inherit}button{cursor:pointer;border:0}.hidden{display:none!important}
+.auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#6c4cff,#8b5cf6)}
+.authbox{width:min(430px,100%);background:#fff;border-radius:24px;padding:25px;box-shadow:0 15px 45px #0002}
+.logo{font-size:28px;font-weight:900;color:#6c4cff;text-align:center}.tag{text-align:center;color:#6b7280;margin:7px 0 22px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:#f1efff;padding:4px;border-radius:12px;margin-bottom:18px}
+.tabs button{padding:11px;border-radius:9px;background:transparent;color:#6c4cff;font-weight:700}.tabs .active{background:#fff;box-shadow:0 2px 8px #0001}
+label{display:block;font-weight:700;margin:13px 0 7px}input,select{width:100%;padding:13px;border:1px solid #d7dbe5;border-radius:10px;background:#fff}
+.primary{width:100%;padding:14px;border-radius:11px;background:#6c4cff;color:#fff;font-weight:800;margin-top:16px}
+.note{font-size:12px;color:#6b7280;line-height:1.5;margin-top:14px}.msg{padding:11px;border-radius:10px;margin-top:12px;font-size:14px}.err{background:#fef2f2;color:#991b1b}.ok{background:#ecfdf5;color:#166534}
+.app{max-width:760px;margin:auto;min-height:100vh;background:#f5f7ff}.top{background:linear-gradient(135deg,#6c4cff,#8b5cf6);color:#fff;padding:20px 18px 27px;border-radius:0 0 28px 28px}
+.topbar{display:flex;justify-content:space-between;align-items:center}.brand{font-size:24px;font-weight:900}.avatar{width:42px;height:42px;border-radius:50%;background:#fff;color:#6c4cff;display:grid;place-items:center;font-weight:900}
+.balance{margin-top:22px}.balance small{opacity:.85}.balance h1{margin:5px 0;font-size:34px}.actions{display:flex;gap:10px;margin-top:17px}.actions button{flex:1;padding:12px;border-radius:12px;background:#fff;color:#6c4cff;font-weight:800}
+.content{padding:16px}.card{background:#fff;border-radius:18px;padding:18px;margin-bottom:15px;box-shadow:0 4px 18px #11182712}.card h2{margin:0 0 10px;font-size:20px}.small{font-size:13px;color:#6b7280}.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.stat{background:#f8f7ff;padding:14px;border-radius:13px}.stat b{display:block;font-size:21px;margin-top:4px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.badge{background:#eeeaff;color:#6c4cff;padding:5px 9px;border-radius:20px;font-size:12px;font-weight:800}
+.price{font-size:27px;font-weight:900;color:#6c4cff;margin-top:12px}.task{border:1px solid #e5e7eb;border-radius:14px;padding:14px;margin-top:10px}.taskrow{display:flex;justify-content:space-between;gap:10px;align-items:center}.task h3{margin:0 0 5px;font-size:16px}.task p{margin:0;color:#6b7280;font-size:13px}.earn{color:#16a34a;font-weight:900;white-space:nowrap}.secondary{padding:10px 13px;border-radius:9px;background:#eeeaff;color:#6c4cff;font-weight:800;margin-top:10px}
+.nav{position:sticky;bottom:0;background:#fff;border-top:1px solid #e5e7eb;display:grid;grid-template-columns:repeat(5,1fr);padding:7px 3px calc(7px + env(safe-area-inset-bottom));z-index:5}.nav button{background:none;color:#6b7280;padding:5px 1px;font-size:11px}.nav button.active{color:#6c4cff;font-weight:900}.nav span{display:block;font-size:19px;margin-bottom:2px}
+.modal{position:fixed;inset:0;background:#0007;display:grid;place-items:center;padding:20px;z-index:20}.modalbox{background:#fff;border-radius:18px;padding:20px;width:min(440px,100%)}.close{float:right;border-radius:50%;width:31px;height:31px;background:#eee}
+@media(max-width:500px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
 
+<!-- LOGIN / SIGNUP -->
+<section id="auth" class="auth">
+ <div class="authbox">
+  <div class="logo">SocialBoost</div>
+  <div class="tag">Boost. Earn. Grow.</div>
+  <div class="tabs">
+   <button id="loginTab" class="active" onclick="authMode('login')">Login</button>
+   <button id="signupTab" onclick="authMode('signup')">Sign Up</button>
+  </div>
+
+  <div id="signupFields" class="hidden">
+   <label>Full name</label><input id="name" placeholder="Your name">
+  </div>
+  <label>Email</label><input id="email" type="email" placeholder="you@example.com">
+  <label>Password</label><input id="password" type="password" placeholder="••••••••">
+  <button class="primary" id="authButton" onclick="submitAuth()">Login</button>
+  <div id="authMsg"></div>
+  <p class="note">Demo authentication: account information is stored only in this browser. A production version needs a secure authentication backend.</p>
+ </div>
+</section>
+
+<!-- DASHBOARD -->
+<div id="app" class="app hidden">
+<header class="top">
+ <div class="topbar"><div class="brand">SocialBoost</div><div class="avatar">SB</div></div>
+ <div class="balance"><small>Available balance</small><h1 id="balance">₦0.00</h1><small id="userEmail">Demo account</small></div>
+ <div class="actions"><button onclick="showPage('wallet')">💳 Deposit</button><button onclick="showPage('boost')">🚀 Boost</button></div>
+</header>
+
+<main class="content">
+
+<section id="home" class="page">
+ <div class="card"><h2>Welcome back 👋</h2><p>Use your wallet to promote your social media, or complete tasks to earn.</p>
+  <div class="grid"><div class="stat"><span class="small">Boost orders</span><b id="orders">0</b></div><div class="stat"><span class="small">Task earnings</span><b id="earned">₦0</b></div></div>
+ </div>
+ <div class="card"><h2>Quick actions</h2><button class="primary" onclick="showPage('boost')">🚀 Create Boost Order</button><button class="primary" onclick="showPage('tasks')">💰 Earn From Tasks</button></div>
+</section>
+
+<section id="boost" class="page hidden">
+ <div class="card"><h2>🚀 Boost your social media</h2><p class="small">Price changes automatically with quantity.</p>
+  <label>Platform</label><select id="platform" onchange="updateServices()"><option>Instagram</option><option>Facebook</option><option>TikTok</option><option>YouTube</option><option>Telegram</option><option>WhatsApp</option><option>X (Twitter)</option></select>
+  <label>Service</label><select id="service" onchange="calc()"></select>
+  <label>Username / Profile link</label><input id="target" placeholder="@username or profile link">
+  <label>Quantity</label><input id="qty" type="number" min="1" value="100" oninput="calc()">
+  <div class="price" id="price">₦0.00</div><p id="rate" class="small"></p>
+  <button class="primary" onclick="placeOrder()">Place Order</button><div id="boostMsg"></div>
+ </div>
+</section>
+
+<section id="tasks" class="page hidden">
+ <div class="card"><div class="row"><h2>💰 Earn with Tasks</h2><span class="badge">Available</span></div>
+  <p class="small">Complete genuine advertiser instructions. Do not use bots, fake accounts, or automated activity.</p>
+  <div id="taskList"></div>
+ </div>
+</section>
+
+<section id="wallet" class="page hidden">
+ <div class="card"><h2>💳 Deposit</h2><p class="small">Minimum deposit ₦200. SocialBoost adds a ₦50 charge to each qualifying deposit.</p>
+  <label>Deposit amount</label><input id="deposit" type="number" min="200" value="500" oninput="depositPreview()">
+  <div class="grid" style="margin-top:12px"><div class="stat"><span class="small">You deposit</span><b id="dep">₦500</b></div><div class="stat"><span class="small">Charge</span><b>₦50</b></div></div>
+  <button class="primary" onclick="paystackPay()">Pay with Paystack (TEST)</button><div id="payMsg"></div>
+ </div>
+ <div class="card"><h2>💸 Withdraw earnings</h2><p class="small">Minimum withdrawal ₦200. Withdrawal charge ₦30.</p>
+  <label>Amount</label><input id="withdraw" type="number" min="200" placeholder="200">
+  <label>Payment method</label><select id="method"><option>Nigerian Bank Account</option><option>OPay</option><option>PalmPay</option><option>MoneyPoint</option></select>
+  <label>Account / wallet number</label><input id="account" placeholder="Account or wallet number">
+  <button class="primary" onclick="withdrawMoney()">Request Withdrawal</button><div id="withdrawMsg"></div>
+ </div>
+</section>
+
+<section id="profile" class="page hidden">
+ <div class="card"><h2>👤 Profile</h2><label>Full name</label><input id="profileName"><label>Email</label><input id="profileEmail">
+  <button class="primary" onclick="saveProfile()">Save Profile</button><button class="primary" onclick="logout()">Log Out</button><div id="profileMsg"></div>
+ </div>
+ <div class="card"><h2>📞 Contact</h2><p>Need help? Contact SocialBoost on WhatsApp.</p><button class="primary" onclick="contact()">WhatsApp Support</button></div>
+</section>
+</main>
+
+<nav class="nav">
+ <button class="active" onclick="showPage('home',this)"><span>🏠</span>Home</button>
+ <button onclick="showPage('boost',this)"><span>🚀</span>Boost</button>
+ <button onclick="showPage('tasks',this)"><span>💰</span>Tasks</button>
+ <button onclick="showPage('wallet',this)"><span>💳</span>Wallet</button>
+ <button onclick="showPage('profile',this)"><span>👤</span>Profile</button>
+</nav>
+</div>
+
+<div id="modal" class="modal hidden"><div class="modalbox"><button class="close" onclick="closeModal()">×</button><h2 id="mtitle"></h2><p id="mtext"></p><button class="primary" id="mcomplete">Submit Completed Task</button></div></div>
+
+<script>
+/* =========================
+   PAYSTACK PUBLIC TEST KEY
+   Replace only this value with your pk_test_... key.
+   NEVER put sk_test_... or sk_live_... here.
+   ========================= */
+const PAYSTACK_PUBLIC_KEY="pk_test_24b0754d587725eb38b8d4125efe5d7f150f0100";
+
+const services={
+ Instagram:{Followers:8,Likes:8,Comments:12,"Story Share":24},
+ Facebook:{"Page Followers":8,Likes:8,Comments:13,"Page Likes":9},
+ TikTok:{Followers:8,Likes:8,Comments:9,"Video Saves":9},
+ YouTube:{Subscribers:13,Likes:13,Comments:13,Views:33},
+ Telegram:{"Channel Members":15,"Post Views":10},
+ WhatsApp:{"Group Members":18},
+ "X (Twitter)":{Followers:12,Likes:9,Retweets:12,Comments:12}
+};
+const tasks=[
+ ["Instagram — Follow a Page",12],["Facebook — Follow a Page",13],
+ ["TikTok — Follow a Profile",12],["YouTube — Subscribe to a Channel",13],
+ ["Telegram — Join a Channel",15],["WhatsApp — Join a Group",18],
+ ["Facebook — Comment on a Post",13],["Instagram — Like a Post",9],
+ ["TikTok — Favourite a Video",15],["X — Retweet a Post",12],
+ ["Custom Promotional Task",100]
+];
+
+let balance=+localStorage.sb_balance||0;
+let earned=+localStorage.sb_earned||0;
+let orders=+localStorage.sb_orders||0;
+let currentUser=JSON.parse(localStorage.sb_user||"null");
+let mode="login";
+
+function money(n){return "₦"+Number(n).toLocaleString("en-NG",{minimumFractionDigits:2,maximumFractionDigits:2})}
+function persist(){localStorage.sb_balance=balance;localStorage.sb_earned=earned;localStorage.sb_orders=orders}
+function authMode(m){
+ mode=m;document.getElementById("loginTab").classList.toggle("active",m==="login");document.getElementById("signupTab").classList.toggle("active",m==="signup");
+ document.getElementById("signupFields").classList.toggle("hidden",m!=="signup");document.getElementById("authButton").textContent=m==="login"?"Login":"Create Account";document.getElementById("authMsg").innerHTML="";
+}
+function submitAuth(){
+ const e=document.getElementById("email").value.trim(),p=document.getElementById("password").value,n=document.getElementById("name").value.trim(),m=document.getElementById("authMsg");
+ if(!e||!p||(mode==="signup"&&!n)){m.className="msg err";m.textContent="Please complete all required fields.";return}
+ if(mode==="signup"){localStorage.sb_user=JSON.stringify({name:n,email:e});currentUser={name:n,email:e};m.className="msg ok";m.textContent="Account created. Opening dashboard..."}
+ else{currentUser=JSON.parse(localStorage.sb_user||"null");if(!currentUser||currentUser.email!==e){m.className="msg err";m.textContent="No demo account found for this email. Use Sign Up first.";return}}
+ localStorage.sb_session="1";setTimeout(openApp,250);
+}
+function openApp(){document.getElementById("auth").classList.add("hidden");document.getElementById("app").classList.remove("hidden");refresh();updateServices();renderTasks();depositPreview()}
+function logout(){localStorage.removeItem("sb_session");document.getElementById("app").classList.add("hidden");document.getElementById("auth").classList.remove("hidden");authMode("login")}
+function refresh(){
+ document.getElementById("balance").textContent=money(balance);document.getElementById("earned").textContent=money(earned);document.getElementById("orders").textContent=orders;
+ document.getElementById("userEmail").textContent=currentUser?.email||"Demo account";
+ document.getElementById("profileName").value=currentUser?.name||"";document.getElementById("profileEmail").value=currentUser?.email||"";
+}
+function showPage(id,btn){
+ document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));document.getElementById(id).classList.remove("hidden");
+ document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));
+ if(btn)btn.classList.add("active");else document.querySelectorAll(".nav button")[["home","boost","tasks","wallet","profile"].indexOf(id)].classList.add("active");
+ scrollTo(0,0);
+}
+function updateServices(){
+ const p=document.getElementById("platform"),s=document.getElementById("service");s.innerHTML="";
+ Object.keys(services[p.value]).forEach(k=>{let o=document.createElement("option");o.value=k;o.textContent=k;s.appendChild(o)});calc();
+}
+function calc(){
+ const p=document.getElementById("platform").value,s=document.getElementById("service").value,q=+document.getElementById("qty").value||0,r=services[p][s]||0;
+ document.getElementById("price").textContent=money(r*q);document.getElementById("rate").textContent=money(r)+" per unit";
+}
+function placeOrder(){
+ const target=document.getElementById("target").value.trim(),total=Number(document.getElementById("price").textContent.replace(/[₦,]/g,"")),m=document.getElementById("boostMsg");
+ if(!target){m.className="msg err";m.textContent="Enter a username or profile link.";return}
+ if(total<=0){m.className="msg err";m.textContent="Enter a valid quantity.";return}
+ if(balance<total){m.className="msg err";m.textContent="Insufficient balance. Deposit funds first.";return}
+ balance-=total;orders++;persist();refresh();m.className="msg ok";m.textContent="Boost order submitted successfully.";
+}
+function depositPreview(){document.getElementById("dep").textContent=money(+document.getElementById("deposit").value||0)}
+function paystackPay(){
+ const amount=+document.getElementById("deposit").value,m=document.getElementById("payMsg");
+ if(amount<200){m.className="msg err";m.textContent="Minimum deposit is ₦200.";return}
+ if(!PAYSTACK_PUBLIC_KEY.startsWith("pk_test_")||PAYSTACK_PUBLIC_KEY.includes("REPLACE")){
+  m.className="msg err";m.textContent="Add your Paystack pk_test_ public key in the code first.";return
+ }
+ const total=amount+50;
+ PaystackPop.setup({
+  key:PAYSTACK_PUBLIC_KEY,email:currentUser?.email||"customer@example.com",amount:total*100,currency:"NGN",
+  callback:function(r){
+   /* TEST DEMO ONLY. Production must verify the transaction on a secure server before crediting balance. */
+   balance+=amount;persist();refresh();m.className="msg ok";m.innerHTML="Test payment successful.<br>Reference: "+r.reference+"<br>"+money(amount)+" credited.";
+  },
+  onClose:function(){m.className="msg";m.textContent="Payment window closed."}
+ }).openIframe();
+}
+function renderTasks(){
+ const box=document.getElementById("taskList");box.innerHTML="";
+ tasks.forEach(t=>{box.innerHTML+=`<div class="task"><div class="taskrow"><div><h3>${t[0]}</h3><p>Complete the advertiser's instructions.</p></div><span class="earn">₦${t[1]}</span></div><button class="secondary" onclick="startTask('${t[0].replace(/'/g,"\\'")}',${t[1]})">View Task</button></div>`})
+}
+function startTask(title,reward){
+ document.getElementById("mtitle").textContent=title;document.getElementById("mtext").textContent="Complete the task genuinely according to the advertiser's instructions. Reward: ₦"+reward+".";
+ document.getElementById("mcomplete").onclick=()=>{earned+=reward;persist();refresh();closeModal();alert("Task submitted. This demo credits the reward immediately. Production should verify task completion on a server.")};
+ document.getElementById("modal").classList.remove("hidden");
+}
+function closeModal(){document.getElementById("modal").classList.add("hidden")}
+function withdrawMoney(){
+ const amount=+document.getElementById("withdraw").value,account=document.getElementById("account").value.trim(),m=document.getElementById("withdrawMsg");
+ if(amount<200){m.className="msg err";m.textContent="Minimum withdrawal is ₦200.";return}
+ if(!account){m.className="msg err";m.textContent="Enter your account or wallet number.";return}
+ if(earned<amount+30){m.className="msg err";m.textContent="Not enough earnings for the amount plus ₦30 withdrawal charge.";return}
+ earned-=amount+30;persist();refresh();m.className="msg ok";m.textContent="Withdrawal request recorded. Production needs a secure payout backend.";
+}
+function saveProfile(){
+ currentUser={name:document.getElementById("profileName").value.trim(),email:document.getElementById("profileEmail").value.trim()};
+ localStorage.sb_user=JSON.stringify(currentUser);refresh();document.getElementById("profileMsg").className="msg ok";document.getElementById("profileMsg").textContent="Profile saved.";
+}
+function contact(){location.href="https://wa.me/2347072075782"}
+if(localStorage.sb_session==="1"&&currentUser)openApp();
+</script>
+</body>
+                                                                                          </html>
